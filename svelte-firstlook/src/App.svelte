@@ -1,18 +1,37 @@
 <script>
-	export let name;
+  import { onMount } from "svelte";
+  import ArtistList from "./ArtistList.svelte";
+  import ArtistSearch from "./ArtistSearch.svelte";
+  let searchTerm = "";
+  let artists = [];
+  let displayList = [];
+
+  function filterList(list, query) {
+    return list.filter(item => {
+      return (
+        item.name.toLowerCase().match(query.toLowerCase()) ||
+        item.bio.toLowerCase().match(query.toLowerCase())
+      );
+    });
+  }
+
+  onMount(async () => {
+    const res = await fetch(`data.json`);
+    artists = await res.json();
+    displayList = artists;
+  });
 </script>
 
-<style lang="scss">
-    $primary: purple;
-
-    @import "../node_modules/bootstrap/scss/bootstrap.scss";
-
-	h1 {
-		color: $primary;
-	}
+<style global lang="scss">
+  $primary: purple;
+  @import "../node_modules/bootstrap/scss/bootstrap.scss";
 </style>
 
 <div class="container">
-    <h1>Hello {name}!</h1>
-    <p class="text-primary">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur varius tortor nec mauris lobortis tristique. Quisque metus risus, pretium nec magna non, mattis maximus purus. Aenean convallis odio vitae varius lacinia. Sed a ligula mollis, semper enim nec, pellentesque risus. Donec a finibus justo. Vivamus pellentesque eget leo nec volutpat. In in euismod dolor. Vestibulum sit amet erat sed ipsum rhoncus pretium.</p>
+    <ArtistSearch
+            bind:searchTerm
+            on:updateSearch={() => {
+      displayList = filterList(artists, searchTerm);
+    }} />
+    <ArtistList bind:artists={displayList} />
 </div>
